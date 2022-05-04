@@ -15,7 +15,6 @@ using System.Windows.Media.Imaging;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
 
-// I am testing the use of git.
 
 [assembly: ESAPIScript(IsWriteable = true)]
 
@@ -56,7 +55,7 @@ namespace Testing_DRR_Images
                 WriteableBitmap drr = BuildDRRImage(beam,Drr);
                 SourcetoPng(drr);
                 System.Drawing.Image png = System.Drawing.Image.FromFile(@"\\Tevirari002\va_data$\ProgramData\Vision\PublishedScripts\TemporaryImages\Drr.png");
-                Bitmap drr_fieldLines = FieldLines(beam, png, Drr);
+                Bitmap drr_fieldLines = FieldLines(beam, png, Drr, plan);
                 png.Dispose();
                 drr_fieldLines.Save(@"\\Tevirari002\va_data$\ProgramData\Vision\PublishedScripts\TemporaryImages\Drr_Field" + beam.Id +".png", ImageFormat.Png);
             }
@@ -118,7 +117,7 @@ namespace Testing_DRR_Images
         }
 
 
-        private static Bitmap FieldLines(Beam beam, System.Drawing.Image source, VMS.TPS.Common.Model.API.Image Drr)
+        private static Bitmap FieldLines(Beam beam, System.Drawing.Image source, VMS.TPS.Common.Model.API.Image Drr, PlanSetup plan)
         {
             Bitmap bitmap = new Bitmap(source);
 
@@ -129,6 +128,7 @@ namespace Testing_DRR_Images
             // Shifts to user orgin.
             int X_offset = (int)beam.IsocenterPosition.y;
             int Y_offset = (int)beam.IsocenterPosition.z;
+            Console.WriteLine(X_offset.ToString());
 
             // User origin.
             int user_origin_X = Centre_X + X_offset;
@@ -137,60 +137,88 @@ namespace Testing_DRR_Images
             double collimatorAngle = (beam.ControlPoints.FirstOrDefault().CollimatorAngle)*(Math.PI/180.00);
 
             VRect<double> jawPositions = beam.ControlPoints.FirstOrDefault().JawPositions;
-            double minJawX = Math.Min(jawPositions.X1, jawPositions.X2);
-            double maxJawX = Math.Max(jawPositions.X1, jawPositions.X2);
 
-            double minJawY = Math.Min(jawPositions.Y1, jawPositions.Y2);
-            double maxJawY = Math.Max(jawPositions.Y1, jawPositions.Y2);
+            double Y2_CenterX = Centre_X - ( jawPositions.Y2 * Math.Sin(collimatorAngle));
+            double Y2_CenterY = Centre_Y - ( jawPositions.Y2 * Math.Cos(collimatorAngle));
 
-            double MinY_centerx = Centre_X - ( maxJawY * Math.Sin(collimatorAngle));
-            double MinY_centery = Centre_Y - ( maxJawY * Math.Cos(collimatorAngle));
-
-            double MaxY_centerx = Centre_X + ( minJawY * Math.Sin(collimatorAngle));
-            double MaxY_centery = Centre_Y + (minJawY * Math.Cos(collimatorAngle));
-
-            Console.WriteLine(string.Format("{0},{1}", MinY_centerx , MinY_centery));
-
-            double MinY_upperx = MinY_centerx + maxJawX * Math.Cos(collimatorAngle);
-            double MinY_uppery = MinY_centery - maxJawX * Math.Sin(collimatorAngle);
-
-            double MinY_lowerx = MinY_centerx + minJawX * Math.Cos(collimatorAngle);
-            double MinY_lowery = MinY_centery - minJawX * Math.Sin(collimatorAngle);
-
-            double MaxY_upperx = MaxY_centerx + maxJawX * Math.Cos(collimatorAngle);
-            double MaxY_uppery = MaxY_centery - maxJawX * Math.Sin(collimatorAngle);
-
-            double MaxY_lowerx = MaxY_centerx + minJawX * Math.Cos(collimatorAngle);
-            double MaxY_lowery = MaxY_centery - minJawX * Math.Sin(collimatorAngle);
+            double Y1_CenterX= Centre_X - ( jawPositions.Y1 * Math.Sin(collimatorAngle));
+            double Y1_CenterY = Centre_Y - (jawPositions.Y1 * Math.Cos(collimatorAngle));
 
 
-            bitmap.SetPixel(user_origin_X, user_origin_Y, System.Drawing.Color.Red);
-            bitmap.SetPixel(user_origin_X - 1, user_origin_Y, System.Drawing.Color.Red);
-            bitmap.SetPixel(user_origin_X + 1, user_origin_Y, System.Drawing.Color.Red);
+            double Y2_UpperX = Y2_CenterX + jawPositions.X2 * Math.Cos(collimatorAngle);
+            double Y2_UpperY = Y2_CenterY - jawPositions.X2 * Math.Sin(collimatorAngle);
+
+            double Y2_LowerX = Y2_CenterX + jawPositions.X1 * Math.Cos(collimatorAngle);
+            double Y2_LowerY = Y2_CenterY - jawPositions.X1 * Math.Sin(collimatorAngle);
+
+            double Y1_UpperX = Y1_CenterX + jawPositions.X2 * Math.Cos(collimatorAngle);
+            double Y1_UpperY = Y1_CenterY - jawPositions.X2 * Math.Sin(collimatorAngle);
+
+            double Y1_LowerX = Y1_CenterX + jawPositions.X1 * Math.Cos(collimatorAngle);
+            double Y1_LowerY = Y1_CenterY - jawPositions.X1 * Math.Sin(collimatorAngle);
+
+            int Graticule_Length = (int)(Math.Round(Drr.XSize * 2 / 100d, 0) * 100);
+
+            int Graticule_PositiveX = (int)(Graticule_Length * Math.Sin(collimatorAngle));
+            int Graticule_PositiveY = (int)(Graticule_Length * Math.Cos(collimatorAngle));
+
+
+            System.Drawing.Pen fieldPen = new System.Drawing.Pen(System.Drawing.Color.Yellow, 1);
+            System.Drawing.Pen isoPen = new System.Drawing.Pen(System.Drawing.Color.Red, 2);
+            System.Drawing.Pen graticulePen = new System.Drawing.Pen(System.Drawing.Color.Yellow, (float)0.5);
+
+            bitmap.SetPixel(user_origin_X, user_origin_Y, System.Drawing.Color.YellowGreen);
+            bitmap.SetPixel(user_origin_X - 1, user_origin_Y, System.Drawing.Color.YellowGreen);
+            bitmap.SetPixel(user_origin_X + 1, user_origin_Y, System.Drawing.Color.YellowGreen);
             bitmap.SetPixel(user_origin_X, user_origin_Y - 1, System.Drawing.Color.Red);
             bitmap.SetPixel(user_origin_X, user_origin_Y + 1, System.Drawing.Color.Red);
 
-            bitmap.SetPixel(Centre_X, Centre_Y, System.Drawing.Color.Blue);
-            bitmap.SetPixel(Centre_X - 1, Centre_Y, System.Drawing.Color.Blue);
-            bitmap.SetPixel(Centre_X + 1, Centre_Y, System.Drawing.Color.Blue);
-            bitmap.SetPixel(Centre_X, Centre_Y - 1, System.Drawing.Color.Blue);
-            bitmap.SetPixel(Centre_X, Centre_Y + 1, System.Drawing.Color.Blue);
-
-            bitmap.SetPixel((int)MinY_centerx, (int)MinY_centery, System.Drawing.Color.Orange);
-
-            
-            System.Drawing.Pen fieldPen = new System.Drawing.Pen(System.Drawing.Color.Yellow, 3);
 
             using (var graphics = Graphics.FromImage(bitmap))
             {
-                graphics.DrawLine(fieldPen, (int)MinY_lowerx, (int)MinY_lowery, (int)MinY_upperx, (int)MinY_uppery);
-                graphics.DrawLine(fieldPen, (int)MaxY_lowerx, (int)MaxY_lowery, (int)MaxY_upperx, (int)MaxY_uppery);
-                graphics.DrawLine(fieldPen, (int)MinY_lowerx, (int)MinY_lowery, (int)MaxY_lowerx, (int)MaxY_lowery);
-                graphics.DrawLine(fieldPen, (int)MinY_upperx, (int)MinY_uppery, (int)MaxY_upperx, (int)MaxY_uppery);
+                graphics.DrawLine(fieldPen, (int)Y2_LowerX, (int)Y2_LowerY, (int)Y2_UpperX, (int)Y2_UpperY);
+                graphics.DrawLine(fieldPen, (int)Y1_LowerX, (int)Y1_LowerY, (int)Y1_UpperX, (int)Y1_UpperY);
+                graphics.DrawLine(fieldPen, (int)Y2_LowerX, (int)Y2_LowerY, (int)Y1_LowerX, (int)Y1_LowerY);
+                graphics.DrawLine(fieldPen, (int)Y2_UpperX, (int)Y2_UpperY, (int)Y1_UpperX, (int)Y1_UpperY);
+
+                graphics.DrawEllipse(isoPen, Centre_X - 5, Centre_Y - 5, 10, 10);
+
+                graphics.DrawLine(graticulePen,(Centre_X + Graticule_PositiveX),(Centre_Y + Graticule_PositiveY), (Centre_X - Graticule_PositiveX), (Centre_Y - Graticule_PositiveY));
+                graphics.DrawLine(graticulePen,(Centre_X + Graticule_PositiveY), (Centre_Y - Graticule_PositiveX), (Centre_X - Graticule_PositiveY), (Centre_Y + Graticule_PositiveX));
+
+                for (int A = -Graticule_Length; A < Graticule_Length; A+=10)
+                {
+                    double Marker_CenterX1 = Centre_X + (A * Math.Sin(collimatorAngle));
+                    double Marker_CenterY1 = Centre_Y + (A * Math.Cos(collimatorAngle));
+                    double Marker_CenterX2 = Centre_X + (A * Math.Cos(collimatorAngle));
+                    double Marker_CenterY2 = Centre_Y - (A * Math.Sin(collimatorAngle));
+
+
+                    if (A % 50 ==0)
+                    {
+                        double Marker_Cosine = (10 * Math.Cos(collimatorAngle));
+                        double Marker_Sine = (10 * Math.Sin(collimatorAngle));
+                        graphics.DrawLine(graticulePen, (int)(Marker_CenterX1 + Marker_Cosine), (int)(Marker_CenterY1 - Marker_Sine), (int)(Marker_CenterX1 - Marker_Cosine), (int)(Marker_CenterY1 + Marker_Sine));
+                        graphics.DrawLine(graticulePen, (int)(Marker_CenterX2 + Marker_Sine), (int)(Marker_CenterY2 + Marker_Cosine), (int)(Marker_CenterX2 - Marker_Sine), (int)(Marker_CenterY2 - Marker_Cosine));
+
+                    }
+                    else
+                    {
+                        double Marker_Cosine = (5 * Math.Cos(collimatorAngle));
+                        double Marker_Sine = (5 * Math.Sin(collimatorAngle));
+                        graphics.DrawLine(graticulePen, (int)(Marker_CenterX1 + Marker_Cosine), (int)(Marker_CenterY1 - Marker_Sine), (int)(Marker_CenterX1 - Marker_Cosine), (int)(Marker_CenterY1 + Marker_Sine));
+                        graphics.DrawLine(graticulePen, (int)(Marker_CenterX2 + Marker_Sine), (int)(Marker_CenterY2 + Marker_Cosine), (int)(Marker_CenterX2 - Marker_Sine), (int)(Marker_CenterY2 - Marker_Cosine));
+
+                    }
+
+
+                }
+
 
             }
 
-            bitmap.SetPixel((int)MinY_centerx, (int)MinY_centery, System.Drawing.Color.Orange);
+            bitmap.SetPixel((int)Y2_CenterX, (int)Y2_CenterY, System.Drawing.Color.Orange);
+
 
             return bitmap;
 
