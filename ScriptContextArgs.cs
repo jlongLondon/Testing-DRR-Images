@@ -16,19 +16,19 @@ namespace ExecutableLogic
         public string CurrentUserId { get; set; }
 
         [Option("course-id")]
-        public string CourseId { get; set; }
+        public string CourseId { get; set; }    
 
         [Option("series-uid")]
-        public string SeriesUid { get; set; }
+        public string SeriesUid  { get; set; }    
 
         [Option("image-id")]
         public string ImageId { get; set; }
 
         [Option("structure-set-id")]
-        public string StructureSetId { get; set; }
+        public string StructureSetId { get; set; }  
 
         [Option("patient-id")]
-        public string PatientId { get; set; }
+        public string PatientId { get; set; }   
 
         [Option("plan-id")]
         public string PlanSetupId { get; set; }
@@ -48,7 +48,10 @@ namespace ExecutableLogic
         [Option("plans-sums-in-scope-ids")]
         public IEnumerable<string> PlansSumsInScopeIds { get; set; }
 
-        [Option("app-name")]
+        [Option("structures-selected-for-dvh")]
+        public IEnumerable<string> StructuresSelectedForDvhIds { get; set; }
+
+        [Option ("app-name")]
         public string ApplicationName { get; set; }
 
         [Option("version")]
@@ -70,6 +73,7 @@ namespace ExecutableLogic
                 ExternalPlansInScopeUids = context.ExternalPlansInScope?.Select(x => x.UID),
                 PlanSumsInScopeCourseIds = context.PlanSumsInScope?.Select(x => x.Course?.Id),
                 PlansSumsInScopeIds = context.PlanSumsInScope?.Select(x => x.Id),
+                StructuresSelectedForDvhIds = context.PlanSetup.StructuresSelectedForDvh?.Select(x => x.Id),
                 ApplicationName = context.ApplicationName,
                 VersionInfo = context.VersionInfo,
             };
