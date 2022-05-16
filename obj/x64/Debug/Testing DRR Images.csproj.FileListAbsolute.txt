@@ -7,8 +7,8 @@ C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\bin\d
 C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\bin\debug\CommandLine.xml
 C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\bin\debug\VMS.TPS.Common.Model.API.xml
 C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\bin\debug\VMS.TPS.Common.Model.Types.xml
-C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\obj\x64\Debug\Testing DRR Images.csproj.AssemblyReference.cache
 C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\obj\x64\Debug\Testing DRR Images.csproj.CoreCompileInputs.cache
 C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\obj\x64\Debug\Testing DRR Images.csproj.CopyComplete
 C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\obj\x64\Debug\Testing DRR Images.exe
 C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\obj\x64\Debug\Testing DRR Images.pdb
+C:\Users\Admin\Documents\Eclipse Scripting API\Projects\Testing DRR Images\obj\x64\Debug\Testing DRR Images.csproj.AssemblyReference.cache
