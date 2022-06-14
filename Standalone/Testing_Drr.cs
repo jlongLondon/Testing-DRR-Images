@@ -25,6 +25,7 @@ namespace Testing_DRR_Images
         [STAThread]
         public static void Main(string[] args)
         {
+            //this is a test
             try
             {
                 using (Application app = Application.CreateApplication())
